@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/app/lib/supabaseServer";
+import bcrypt from "bcryptjs";
 
 // GET - Obtener todos los usuarios
 export async function GET() {
@@ -19,9 +20,12 @@ export async function POST(request) {
     const supabase = createServerSupabaseClient();
     const body = await request.json();
 
+    // Encriptamos la contraseña antes de guardarla
+    const passwordEncriptada = await bcrypt.hash(body.password, 10);
+
     const { data, error } = await supabase
         .from('usuarios')
-        .insert([body])
+        .insert([{ ...body, password: passwordEncriptada }])
         .select();
 
     if (error) {
